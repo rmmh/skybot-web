@@ -1,0 +1,5 @@
+This is a web interface for skybot, an IRC bot written in Python.
+
+This project uses the Flask framework.
+
+Skybot's homepage is http://github.com/rmmh/skybot
