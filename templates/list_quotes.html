@@ -1,77 +1,44 @@
-{# 
-
-<pre>
-{% for quote in quotes %}
-    {{ loop.index }} {{ quote.time | ptime }} &lt;{{ quote.nick }}&gt; {{ quote.msg }}
-{%- endfor %}
-</pre>
-
-#}
-
-<!doctype html>
-<head>
-<title>Quote logger thing.</title>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
-<script src="{{ url_for('static', filename='dataTables.js') }}"></script>
-
-<link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static', filename='demo_page.css') }}" />
-<link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static', filename='demo_table.css') }}" />
-<link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static', filename='Oxygen.css') }}" />
-<link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static', filename='Oxygen_cs.css') }}" />
-<link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static', filename='style.css') }}" />
+{% extends "base.html" %}
+{% block title %}Quotes for {{ chan_name }} {% endblock %}
+{% block head %}
+<script src="//cdn.datatables.net/1.10.4/js/jquery.dataTables.min.js"></script>
+<script src="//cdn.datatables.net/plug-ins/3cfcc339e89/integration/bootstrap/3/dataTables.bootstrap.js"></script>
+<link rel="stylesheet" type="text/css" media="screen" href="//cdn.datatables.net/plug-ins/3cfcc339e89/integration/bootstrap/3/dataTables.bootstrap.css">
 
 <script type="text/javascript">
     $(document).ready(function() {
         $("#quoteLog").dataTable({
-            "sPaginationType": "full_numbers",
-            "iDisplayLength": 100,
-            "aoColumnDefs": [
-                { "asSorting": [ "desc" ], "aTargets": [ 0 ] },
-                { "sWidth": "70%", "aTargets": [2] },
+            "order": [[0, 'desc'], [1, 'asc']],
+            "columnDefs": [
+                { "width": "70%", "targets": 2 },
             ],
-            "iDisplayLength": 25,
-            "bFilter": false,
+            "pageLength": 25,
         });
     })
 </script>
-
-</head>
-
-<body>
-
-<div class="brd" id="brd-wrap">
-    <div id="brd-index" class="brd-page basic-page">
-
-        <div class="gen-content" id="brd-head">
-            <p id="brd-title"><h1 class="bigText">Quotes for {{ chan_name }}</h1></p>
-        </div>
-
-        <div id="table-desc" class="gen-content">
-            <p>25 most recent quotes baby</o>
-        </div>
-
-        <div id="table-wrapper" class="gen-content">
-        <table id="quoteLog" cellspacing="0" cellpadding="0">
-            <thead>
-                <tr>
-                    <th>Time</th>
-                    <th>Nick</th>
-                    <th>Message</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for quote in quotes %}
-                <tr>
-                    <td>{{ quote.time | ptime }}</td>
-                    <td>{{ quote.nick }}</td>
-                    <td>{{ quote.msg }}</td>
-                </tr>
-                {%- endfor %}
-            </tbody>
-        </table>
-        </div>
-    </div>
+{% endblock %}
+{% block content %}
+<div class="row">
+    <p><h1><a href="{{ url_for('list_channels') }}">Quotes</a> for {{ chan_name }}</h1></p>
 </div>
-</body>
-</html>
-</body>
+<div class="row">
+<table id="quoteLog" class="table table-striped">
+    <thead>
+        <tr>
+            <th>Time</th>
+            <th>Nick</th>
+            <th style="width: 80%">Message</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for quote in quotes %}
+        <tr>
+            <td>{{ quote.time | ptime }}</td>
+            <td>{{ quote.nick }}</td>
+            <td><p>{{ quote.msg }}</p></td>
+        </tr>
+        {%- endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

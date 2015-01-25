@@ -3,13 +3,14 @@
 import sqlite3
 import time
 
-from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash
+from flask import Flask, g, render_template
 
 
 app = Flask("skybot")
 
 
 app.config.from_pyfile('config.cfg')
+
 
 def connect_db():
     conn = sqlite3.connect(app.config['DATABASE'])
@@ -30,7 +31,7 @@ def after_request(response):
 
 @app.template_filter('ptime')
 def ptime(t):
-    return time.strftime('%Y.%m.%d', time.gmtime(int(t)))
+    return time.strftime('%Y-%m-%d %H:%M', time.gmtime(int(t)))
 
 
 @app.route("/")
@@ -38,26 +39,28 @@ def index():
     return "Hello World!"
 
 
-#@app.route("/quotes")
-#def list_quotes():
-#    quotes = g.db.execute('SELECT * FROM quote WHERE deleted = 0 AND chan = ? '
-#                          'order by nick asc, time asc', ('#cobol',)).fetchall()
-#
-#    chan_name = "#cobol"
-#    return render_template('list_quotes.html', quotes=quotes, chan_name=chan_name)
-
 @app.route("/quotes/")
-@app.route("/quotes/<chanName>")
-def list_quotes(chanName=None):
-    if chanName == None:
-        chan_name = "#cobol"
-    else:
-        chan_name = "#" + chanName
+def list_channels():
+    chans = g.db.execute(
+        "SELECT chan, COUNT(*) as count FROM quote "
+        " WHERE chan LIKE '#%'"
+        " GROUP BY chan ORDER BY count DESC"
+    ).fetchall()
 
-    quotes = g.db.execute('SELECT * FROM quote WHERE deleted =0 AND chan= ? '
-                          'order by nick asc, time asc', (chan_name,)).fetchall()
+    return render_template(
+        'list_channels.html', chans=chans)
 
-    return render_template('list_quotes.html', quotes=quotes, chan_name=chan_name)
+
+@app.route("/quotes/chan/<chan>")
+def list_quotes(chan):
+    chan_name = "#" + chan
+
+    quotes = g.db.execute(
+        'SELECT * FROM quote WHERE deleted =0 AND chan= ? '
+        'order by nick asc, time asc', (chan_name,)).fetchall()
+
+    return render_template(
+        'list_quotes.html', quotes=quotes, chan_name=chan_name)
 
 
 if __name__ == "__main__":
